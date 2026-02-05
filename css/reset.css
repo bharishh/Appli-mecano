@@ -1,4 +1,4 @@
-/* RESET & BASE */
+
 * {
     margin: 0;
     padding: 0;
@@ -16,7 +16,7 @@ body {
     min-height: 100vh;
 }
 
-/* NAVBAR */
+
 .navbar {
     background: #2f3c56;
     display: flex;
@@ -43,18 +43,8 @@ body {
     cursor: pointer;
 }
 
-/* HERO (Commun aux 3 pages) */
-.hero {
-    text-align: center;
-    padding: 60px 20px;
-    background: #ffffff;
-}
 
-.hero h1 { font-size: 36px; margin-bottom: 10px; }
-.hero h1 span { color: #5bb6b6; }
-.hero p { color: #666; }
 
-/* FOOTER */
 .footer {
     margin-top: auto; /* Pousse le footer en bas */
     background: #2f3c56;

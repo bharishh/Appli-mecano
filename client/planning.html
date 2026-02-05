@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <link rel="apple-touch-icon" sizes="180x180" href="../favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon/favicon-16x16.png">
+    <link rel="manifest" href="../favicon/site.webmanifest">
+
+    <title>Prise de rendez-vous – AutoPlus</title>
+
+    <link rel="stylesheet" href="../css/reset.css">
+    <link rel="stylesheet" href="../css/rendezvous.css">
+</head>
+<body>
+
+<header class="navbar">
+    <div class="nav-left">
+        <img src="../asset/logoGarage.png" alt="logo garage">
+    </div>
+    <nav class="nav-center">
+        <a href="../index.html">Accueil</a>
+        <a href="#">Services</a>
+        <a href="#">Contact</a>
+    </nav>
+    <div class="nav-right">
+        <button class="btn-profile">Profil</button>
+    </div>
+</header>
+
+<input type="checkbox" id="show-form">
+<input type="checkbox" id="show-recap">
+
+<main class="booking">
+
+    <section class="calendar">
+        <h3>1. Choisissez votre date et heure</h3>
+
+        <div class="calendar-box">
+            <div class="calendar-header">
+                <button type="button" class="btn-nav">&lt;</button>
+                <span id="current-month">Janvier 2026</span>
+                <button type="button" class="btn-nav">&gt;</button>
+            </div>
+
+            <div class="calendar-grid">
+                <div class="day-name">Lun</div><div class="day-name">Mar</div><div class="day-name">Mer</div>
+                <div class="day-name">Jeu</div><div class="day-name">Ven</div><div class="day-name">Sam</div><div class="day-name">Dim</div>
+
+                <div class="day empty"></div><div class="day empty"></div><div class="day">1</div><div class="day">2</div>
+                <div class="day">3</div><div class="day">4</div><div class="day">5</div><div class="day">6</div>
+                <div class="day">7</div><div class="day">8</div><div class="day selected">9</div>
+                <div class="day">10</div><div class="day">11</div><div class="day disabled">12</div>
+                <div class="day">13</div><div class="day">14</div><div class="day">15</div>
+            </div>
+        </div>
+
+        <div class="slots">
+            <label class="slot">
+                <input type="radio" name="slot" checked>
+                <span>08:00</span>
+            </label>
+            <label class="slot">
+                <input type="radio" name="slot">
+                <span>11:00</span>
+            </label>
+            <label class="slot">
+                <input type="radio" name="slot">
+                <span>17:00</span>
+            </label>
+        </div>
+
+        <label for="show-form" class="btn-primary">Valider le créneau</label>
+    </section>
+
+    <section class="form-section">
+        <h3>2. Vos coordonnées</h3>
+        <div class="form-container">
+            <input type="text" placeholder="Nom">
+            <input type="text" placeholder="Prénom">
+            <input type="email" placeholder="Email">
+            <input type="tel" placeholder="Téléphone">
+
+            <label for="show-recap" class="btn-primary">Valider mes coordonnées</label>
+        </div>
+    </section>
+
+    <section class="recap">
+        <h3>3. Confirmation</h3>
+        <div class="recap-card">
+            <div class="recap-item"><strong>Service :</strong> Révision complète</div>
+            <div class="recap-item"><strong>Date :</strong> 9 Janvier 2026 à 08:00</div>
+            <div class="recap-item"><strong>Lieu :</strong> Garage AutoPlus - Paris</div>
+            <hr>
+            <div class="recap-price">Total : 120 €</div>
+        </div>
+        <button class="btn-confirm">Confirmer définitivement</button>
+    </section>
+
+</main>
+</body>
+</html>

@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="apple-touch-icon" sizes="180x180" href="../favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon/favicon-16x16.png">
+    <link rel="manifest" href="../favicon/site.webmanifest">
+    <title>Accueil – AutoPlus</title>
+
+    <link rel="stylesheet" href="../css/reset.css">
+    <link rel="stylesheet" href="../css/pageAcceuil.css">
+</head>
+<body>
+
+<header class="navbar">
+    <div class="nav-left">
+        <img src="../asset/logoGarage.png" alt="logo garage">
+    </div>
+
+    <nav class="nav-center">
+        <a href="acceuil.html">Accueil</a>
+        <a href="#">Services</a>
+        <a href="#">Contact</a>
+    </nav>
+
+    <div class="nav-right">
+        <button class="btn-profile">Profil</button>
+    </div>
+</header>
+
+<section class="hero">
+    <h1>Bienvenue chez <span>AutoPlus</span></h1>
+    <p>Expert en entretien et réparation automobile depuis 2000</p>
+
+    <div class="infos">
+        <span>📍 123 Rue de l'Automobile, Paris</span>
+        <span>📞 01 23 45 67 89</span>
+        <span>🕘 Lun-Ven 8h-18h</span>
+    </div>
+</section>
+
+<section class="search">
+    <h2>Prendre rendez-vous</h2>
+
+    <form class="search-box" action="planning.html" method="get">
+        <div>
+            <label>Type de service</label>
+            <select name="service" required>
+                <option value="">Sélectionner un service...</option>
+                <option value="revision">Révision</option>
+                <option value="freinage">Freinage</option>
+                <option value="pneus">Pneus</option>
+            </select>
+        </div>
+
+        <button type="submit">Voir les disponibilités</button>
+    </form>
+</section>
+
+<section class="services">
+    <div class="card">
+        <div class="icon">⚙️</div>
+        <h3>Révision</h3>
+        <p>Entretien complet du véhicule</p>
+    </div>
+
+    <div class="card">
+        <div class="icon">🛑</div>
+        <h3>Freinage</h3>
+        <p>Sécurité et performance</p>
+    </div>
+
+    <div class="card">
+        <div class="icon">🚗</div>
+        <h3>Pneus</h3>
+        <p>Tenue de route optimale</p>
+    </div>
+</section>
+
+<footer class="footer">
+    <div class="footer-container">
+        <div class="footer-block">
+            <h4>Coordonnées</h4>
+            <p>
+                123 Rue de l'Automobile<br>
+                75001 Paris<br>
+                01 23 45 67 89
+            </p>
+        </div>
+
+        <div class="footer-block">
+            <h4>Horaires</h4>
+            <p>
+                Lun-Ven : 8h00 - 18h00<br>
+                Sam : 9h00 - 12h00
+            </p>
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>
