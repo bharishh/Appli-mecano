@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
+    <link rel="manifest" href="favicon/site.webmanifest">
+    <link rel="stylesheet" href="css/pageConnexion.css">
+    <title>Page Connexion</title>
+</head>
+<body>
+
+<div class="login-page">
+    <div class="login-card">
+
+        <div class="login-header">
+            <img src="asset/logoGarage.png" alt="AutoPlus">
+            <div class="header-text">
+                <h1>AutoPlus</h1>
+                <p>Votre garage de confiance</p>
+            </div>
+        </div>
+
+        <div class="login-content">
+            <h2>Connexion</h2>
+
+            <form id="loginForm">
+                <label>Email</label>
+                <input type="email" id="email" placeholder="votre@email.com" required>
+                <label>Mot de passe</label>
+                <input type="password" id="password" placeholder="••••••••" required>
+
+                <button type="submit">Se connecter</button>
+            </form>
+
+            <div class="links">
+                <a href="#">Mot de passe oublié ?</a>
+                <a href="inscrire.html">Créer un compte</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+
+        const form = document.getElementById("loginForm");
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+
+            try {
+                const response = await fetch("http://localhost:8080/api/garage/auth/login", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                if (!response.ok) {
+                    throw new Error("Email ou mot de passe incorrect");
+                }
+
+                const result = await response.json();
+
+                // stocker login
+                localStorage.setItem("user", JSON.stringify(result));
+
+                window.location.href = "client/acceuil.html";
+
+            } catch (error) {
+                console.error(error);
+                alert("Erreur de connexion");
+            }
+        });
+
+    });
+</script>
+</html>
