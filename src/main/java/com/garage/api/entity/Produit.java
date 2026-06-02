@@ -17,9 +17,7 @@ public class Produit {
     private Long id;
 
     private String nom;
-    private String type; // Exemple: "Pneu"
+    private String type;
     private double prix;
-
-    @Column(name = "quantite_stock")
     private int quantiteStock;
 }

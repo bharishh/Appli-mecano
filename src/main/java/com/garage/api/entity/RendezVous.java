@@ -2,8 +2,19 @@ package com.garage.api.entity;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import jakarta.persistence.*;
-import lombok.*;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
@@ -18,15 +29,9 @@ public class RendezVous {
     @Column(name = "id_rdv")
     private Long id;
 
-    @Column(name = "date_rdv", nullable = false)
     private LocalDate dateRdv;
-
-    @Column(name = "heure_rdv", nullable = false)
     private LocalTime heureRdv;
-
-    private String statut; // "EN_ATTENTE", "VALIDE", "ANNULE"
-    
-    @Column(name = "rappel_envoye")
+    private String statut;
     private boolean rappelEnvoye;
 
     @ManyToOne
@@ -36,11 +41,12 @@ public class RendezVous {
     @ManyToOne
     @JoinColumn(name = "id_vehicule")
     private Vehicule vehicule;
-    @ManyToOne
-    @JoinColumn(name = "id_mecanicien") // 👈 Doit correspondre à la colonne mecanicien
-    private Mecanicien mecanicien;
 
     @ManyToOne
     @JoinColumn(name = "id_service")
-    private Prestation prestation; // (Appelée 'Service' dans ton MCD)
+    private Prestation prestation;
+
+    @ManyToOne
+    @JoinColumn(name = "id_mecanicien")
+    private Mecanicien mecanicien;
 }

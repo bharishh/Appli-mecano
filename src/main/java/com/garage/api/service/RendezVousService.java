@@ -33,24 +33,24 @@ public class RendezVousService {
     @Transactional
     public RendezVous prendreRendezVous(RendezVousRequest request) {
         
-        // 1. Vérifier si le créneau est déjà pris
+        //  Vérifier si le créneau est déjà pris
         if (rendezVousRepository.existsByDateRdvAndHeureRdv(request.getDateRdv(), request.getHeureRdv())) {
             throw new RuntimeException("Ce créneau horaire est déjà réservé.");
         }
 
-        // 2. Récupérer le client
+        // Récupérer le client
         Client client = clientRepository.findById(request.getIdClient())
                 .orElseThrow(() -> new RuntimeException("Client introuvable."));
 
-        // 3. Récupérer la prestation
+        //  Récupérer la prestation
         Prestation prestation = prestationRepository.findById(request.getIdPrestation())
                 .orElseThrow(() -> new RuntimeException("Prestation introuvable."));
 
-        // 4. Récupérer le mécanicien par défaut (ID 1L) obligatoire selon le MLD
+        // Récupérer le mécanicien par défaut (ID 1L) 
         Mecanicien mecanicienParDefaut = mecanicienRepository.findById(1L)
                 .orElseThrow(() -> new RuntimeException("Mécanicien par défaut introuvable en BDD."));
         
-        // 5. Créer et enregistrer le véhicule lié au client (génère l'id_vehicule)
+        // Créer et enregistrer le véhicule lié au client
         Vehicule vehicule = Vehicule.builder()
                 .marque(request.getMarque())
                 .modele(request.getModele())
@@ -58,21 +58,21 @@ public class RendezVousService {
                 .annee(request.getAnnee())
                 .typeCarburant(request.getTypeCarburant())
                 .kilometrage(request.getKilometrage())
-                .client(client) // Clé étrangère #id_client rattachée
+                .client(client) 
                 .build();
         
         vehicule = vehiculeRepository.save(vehicule);
 
-        // 6. Créer et enregistrer le Rendez-vous avec TOUTES ses clés étrangères du MLD
+        // Créer et enregistrer le Rendez-vous avec TOUTES ses clés étrangères du MLD
         RendezVous rdv = RendezVous.builder()
                 .dateRdv(request.getDateRdv())
                 .heureRdv(request.getHeureRdv())
                 .statut("EN_ATTENTE")
                 .rappelEnvoye(false)
-                .client(client)           // #id_client_fk
-                .vehicule(vehicule)       // #id_vehicule
-                .prestation(prestation)   // #id_service_fk
-                .mecanicien(mecanicienParDefaut) // #id_mecanicien_fk (Correction apportée ici)
+                .client(client)           
+                .vehicule(vehicule)      
+                .prestation(prestation)   
+                .mecanicien(mecanicienParDefaut) 
                 .build();
 
         RendezVous rdvEnregistre = rendezVousRepository.save(rdv);
