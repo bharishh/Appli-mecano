@@ -30,10 +30,13 @@ public class Commande {
     @JoinColumn(name = "id_client", nullable = false)
     private Client client;
 
+    @ManyToOne
+    @JoinColumn(name = "id_mecanicien")
+    private Mecanicien mecanicien;
     
     @ManyToMany
     @JoinTable(
-        name = "commande_produit",
+        name = "contient",
         joinColumns = @JoinColumn(name = "id_commande"),
         inverseJoinColumns = @JoinColumn(name = "id_produit")
     )
