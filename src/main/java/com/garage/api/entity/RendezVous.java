@@ -30,14 +30,17 @@ public class RendezVous {
     private boolean rappelEnvoye;
 
     @ManyToOne
-    @JoinColumn(name = "id_client", nullable = false)
+    @JoinColumn(name = "id_client")
     private Client client;
 
     @ManyToOne
-    @JoinColumn(name = "id_vehicule", nullable = false)
+    @JoinColumn(name = "id_vehicule")
     private Vehicule vehicule;
+    @ManyToOne
+    @JoinColumn(name = "id_mecanicien") // 👈 Doit correspondre à la colonne mecanicien
+    private Mecanicien mecanicien;
 
     @ManyToOne
-    @JoinColumn(name = "id_service", nullable = false)
+    @JoinColumn(name = "id_service")
     private Prestation prestation; // (Appelée 'Service' dans ton MCD)
 }
