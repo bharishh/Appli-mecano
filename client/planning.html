@@ -2,6 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="apple-touch-icon" sizes="180x180" href="../favicon/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="../favicon/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="../favicon/favicon-16x16.png">
@@ -15,17 +16,13 @@
 <body>
 
 <header class="navbar">
-    <div class="nav-left">
-        <img src="../asset/logoGarage.png" alt="logo garage">
-    </div>
+    <div class="nav-left"><img src="../asset/logoGarage.png" alt="logo garage"></div>
     <nav class="nav-center">
         <a href="../index.html">Accueil</a>
         <a href="#">Services</a>
         <a href="#">Contact</a>
     </nav>
-    <div class="nav-right">
-        <button class="btn-profile">Profil</button>
-    </div>
+    <div class="nav-right"><button class="btn-profile">Profil</button></div>
 </header>
 
 <input type="checkbox" id="show-form">
@@ -35,68 +32,117 @@
 
     <section class="calendar">
         <h3>1. Choisissez votre date et heure</h3>
-
-        <div class="calendar-box">
-            <div class="calendar-header">
-                <button type="button" class="btn-nav">&lt;</button>
-                <span id="current-month">Janvier 2026</span>
-                <button type="button" class="btn-nav">&gt;</button>
-            </div>
-
-            <div class="calendar-grid">
-                <div class="day-name">Lun</div><div class="day-name">Mar</div><div class="day-name">Mer</div>
-                <div class="day-name">Jeu</div><div class="day-name">Ven</div><div class="day-name">Sam</div><div class="day-name">Dim</div>
-
-                <div class="day empty"></div><div class="day empty"></div><div class="day">1</div><div class="day">2</div>
-                <div class="day">3</div><div class="day">4</div><div class="day">5</div><div class="day">6</div>
-                <div class="day">7</div><div class="day">8</div><div class="day selected">9</div>
-                <div class="day">10</div><div class="day">11</div><div class="day disabled">12</div>
-                <div class="day">13</div><div class="day">14</div><div class="day">15</div>
-            </div>
+        <div style="margin: 20px 0;">
+            <label>Date du rendez-vous :</label>
+            <input type="date" id="dateRdv" required style="width:100%; padding:15px; margin-top:10px; border: 1px solid #ddd; border-radius: 8px;">
         </div>
 
         <div class="slots">
-            <label class="slot">
-                <input type="radio" name="slot" checked>
-                <span>08:00</span>
-            </label>
-            <label class="slot">
-                <input type="radio" name="slot">
-                <span>11:00</span>
-            </label>
-            <label class="slot">
-                <input type="radio" name="slot">
-                <span>17:00</span>
-            </label>
+            <label class="slot"><input type="radio" name="slot" value="08:00:00" checked><span>08:00</span></label>
+            <label class="slot"><input type="radio" name="slot" value="11:00:00"><span>11:00</span></label>
+            <label class="slot"><input type="radio" name="slot" value="17:00:00"><span>17:00</span></label>
         </div>
-
         <label for="show-form" class="btn-primary">Valider le créneau</label>
     </section>
 
     <section class="form-section">
-        <h3>2. Vos coordonnées</h3>
+        <h3>2. Informations du véhicule</h3>
         <div class="form-container">
-            <input type="text" placeholder="Nom">
-            <input type="text" placeholder="Prénom">
-            <input type="email" placeholder="Email">
-            <input type="tel" placeholder="Téléphone">
+            <input type="text" id="vehicule-marque" placeholder="Marque" required>
+            <input type="text" id="vehicule-modele" placeholder="Modèle" required>
+            <input type="text" id="vehicule-immat" placeholder="Immatriculation" required>
+            <input type="number" id="vehicule-annee" placeholder="Année" required>
+            <input type="number" id="vehicule-km" placeholder="Kilométrage" required>
+            <input type="text" id="vehicule-carburant" placeholder="Carburant (ESSENCE, DIESEL...)" required>
 
-            <label for="show-recap" class="btn-primary">Valider mes coordonnées</label>
+            <label for="show-recap" class="btn-primary" id="btn-vers-recap">Valider les informations</label>
         </div>
     </section>
 
     <section class="recap">
         <h3>3. Confirmation</h3>
         <div class="recap-card">
-            <div class="recap-item"><strong>Service :</strong> Révision complète</div>
-            <div class="recap-item"><strong>Date :</strong> 9 Janvier 2026 à 08:00</div>
+            <div class="recap-item"><strong>Service :</strong> <span id="recap-service">...</span></div>
+            <div class="recap-item"><strong>Date :</strong> <span id="recap-date-heure">...</span></div>
             <div class="recap-item"><strong>Lieu :</strong> Garage AutoPlus - Paris</div>
             <hr>
-            <div class="recap-price">Total : 120 €</div>
+            <div class="recap-price" id="recap-prix">Total : -- €</div>
         </div>
-        <button class="btn-confirm">Confirmer définitivement</button>
+        <button type="button" class="btn-confirm" id="btn-final-submit">Confirmer définitivement</button>
     </section>
 
 </main>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const idService = localStorage.getItem("service_choisi_id");
+        const libelleService = localStorage.getItem("service_choisi_libelle");
+
+        if (!idService) {
+            alert("Aucun service sélectionné. Retour à l'accueil.");
+            window.location.href = "../index.html";
+            return;
+        }
+
+        // 1. Configuration automatique de la date (bloque le passé)
+        const inputDate = document.getElementById("dateRdv");
+        const aujourdhui = new Date().toISOString().split("T")[0];
+        inputDate.min = aujourdhui;
+        inputDate.value = aujourdhui;
+
+        // 2. Étape Récapitulatif : Remplir les textes avant la confirmation
+        document.getElementById("btn-vers-recap").addEventListener("click", () => {
+            const heure = document.querySelector('input[name="slot"]:checked').value;
+            const dateFr = inputDate.value.split('-').reverse().join('/');
+
+            document.getElementById("recap-service").textContent = libelleService;
+            document.getElementById("recap-date-heure").textContent = `${dateFr} à ${heure.substring(0, 5)}`;
+            document.getElementById("recap-prix").textContent = `Total : ${libelleService}`;
+        });
+
+        // 3. Envoi final à l'API Spring Boot
+        document.getElementById("btn-final-submit").addEventListener("click", () => {
+
+            // DYNAMIQUE : On récupère l'ID du client actuellement stocké dans la session (au choix: "client_id", "id", "userId")
+            // Si rien n'est trouvé, on met 1 par défaut pour éviter un champ vide
+            const currentClientId = localStorage.getItem("client_id") || localStorage.getItem("userId") || 1;
+
+            const payload = {
+                dateRdv: inputDate.value,
+                heureRdv: document.querySelector('input[name="slot"]:checked').value,
+                idPrestation: parseInt(idService),
+                idClient: parseInt(currentClientId), // Modifié : l'ID s'adapte au client connecté
+                marque: document.getElementById("vehicule-marque").value,
+                modele: document.getElementById("vehicule-modele").value,
+                immatriculation: document.getElementById("vehicule-immat").value,
+                annee: parseInt(document.getElementById("vehicule-annee").value) || 2026,
+                typeCarburant: document.getElementById("vehicule-carburant").value,
+                kilometrage: parseInt(document.getElementById("vehicule-km").value) || 0
+            };
+
+            fetch("http://localhost:8080/api/garage/rendezvous", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            })
+                .then(res => {
+                    if (res.ok) return res.json();
+                    throw new Error("Erreur serveur : " + res.status);
+                })
+                .then(() => {
+                    alert("🎉 Rendez-vous enregistré avec succès !");
+                    // On nettoie uniquement les données du rendez-vous, on garde le client connecté
+                    localStorage.removeItem("service_choisi_id");
+                    localStorage.removeItem("service_choisi_libelle");
+                    window.location.href = "../index.html";
+                })
+                .catch((err) => {
+                    console.error(err);
+                    alert("Erreur lors de la réservation. Vérifiez que votre serveur Spring Boot accepte la requête.");
+                });
+        });
+    });
+</script>
+
 </body>
 </html>

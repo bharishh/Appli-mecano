@@ -23,14 +23,11 @@
         <a href="index.html">Accueil</a>
         <a href="#">Services</a>
         <a href="#">Contact</a>
-
     </nav>
 
     <div class="nav-right">
-
-            <button class="btn-profile" id="profileBtn">Profil</button>
+        <button class="btn-profile" id="profileBtn">Profil</button>
     </div>
-
 </header>
 
 <section class="hero">
@@ -47,14 +44,11 @@
 <section class="search">
     <h2>Prendre rendez-vous</h2>
 
-    <form class="search-box" action="client/planning.html" method="get">
+    <form class="search-box" id="form-rdv">
         <div>
             <label>Type de service</label>
-            <select name="service" required>
+            <select name="service" id="select-services" required>
                 <option value="">Sélectionner un service...</option>
-                <option value="revision">Révision</option>
-                <option value="freinage">Freinage</option>
-                <option value="pneus">Pneus</option>
             </select>
         </div>
 
@@ -62,24 +56,8 @@
     </form>
 </section>
 
-<section class="services">
-    <div class="card">
-        <div class="icon">⚙️</div>
-        <h3>Révision</h3>
-        <p>Entretien complet du véhicule</p>
-    </div>
-
-    <div class="card">
-        <div class="icon">🛑</div>
-        <h3>Freinage</h3>
-        <p>Sécurité et performance</p>
-    </div>
-
-    <div class="card">
-        <div class="icon">🚗</div>
-        <h3>Pneus</h3>
-        <p>Tenue de route optimale</p>
-    </div>
+<section class="services" id="container-services">
+    <p style="text-align: center; width: 100%;">Chargement des services...</p>
 </section>
 
 <footer class="footer">
@@ -102,6 +80,90 @@
         </div>
     </div>
 </footer>
+
+<script>
+    const API_URL = "http://localhost:8080/api/garage/prestations";
+
+    document.addEventListener("DOMContentLoaded", () => {
+        chargerPrestations();
+        configurerFormulaire();
+    });
+
+    // 1. Récupérer et afficher les prestations de la BDD
+    function chargerPrestations() {
+        fetch(API_URL)
+            .then(response => {
+                if (!response.ok) throw new Error("Erreur réseau");
+                return response.json();
+            })
+            .then(prestations => {
+                const selectServices = document.getElementById("select-services");
+                const containerServices = document.getElementById("container-services");
+
+                // On nettoie le conteneur des cartes
+                containerServices.innerHTML = "";
+
+                if (prestations.length === 0) {
+                    containerServices.innerHTML = "<p style='text-align:center; width:100%;'>Aucun service disponible pour le moment.</p>";
+                    return;
+                }
+
+                prestations.forEach(prestation => {
+                    // A. Ajouter l'option dans le menu déroulant
+                    const option = document.createElement("option");
+                    option.value = prestation.id;
+                    option.textContent = `${prestation.libelle} (${prestation.prix} €)`;
+                    selectServices.appendChild(option);
+
+                    // B. Générer la carte avec ton design CSS existant
+                    const card = document.createElement("div");
+                    card.className = "card";
+
+                    // Logique pour adapter l'icône selon le nom du service
+                    let icone = "⚙️";
+                    const nomMinuscule = prestation.libelle.toLowerCase();
+                    if (nomMinuscule.includes("frein")) icone = "🛑";
+                    if (nomMinuscule.includes("pneu")) icone = "🚗";
+
+                    card.innerHTML = `
+                        <div class="icon">${icone}</div>
+                        <h3>${prestation.libelle}</h3>
+                        <p>${prestation.description}</p>
+                        <span style="display:block; margin-top:10px; font-weight:bold; color:#007bff;">
+                            ${prestation.prix} € — ${prestation.duree} min
+                        </span>
+                    `;
+                    containerServices.appendChild(card);
+                });
+            })
+            .catch(error => {
+                console.error("Erreur:", error);
+                document.getElementById("container-services").innerHTML =
+                    "<p style='color:red; text-align:center; width:100%;'>Erreur de connexion avec le serveur de l'API.</p>";
+            });
+    }
+
+    // 2. Intercepter la validation du formulaire pour changer de page
+    function configurerFormulaire() {
+        const form = document.getElementById("form-rdv");
+        form.addEventListener("submit", (e) => {
+            e.preventDefault();
+
+            const select = document.getElementById("select-services");
+            const idServiceChoisi = select.value;
+            const libelleServiceChoisi = select.options[select.selectedIndex].text;
+
+            if (idServiceChoisi) {
+                // Stockage des informations dans le navigateur
+                localStorage.setItem("service_choisi_id", idServiceChoisi);
+                localStorage.setItem("service_choisi_libelle", libelleServiceChoisi);
+
+                // Redirection vers ton fichier planning
+                window.location.href = "client/planning.html";
+            }
+        });
+    }
+</script>
 
 </body>
 </html>
