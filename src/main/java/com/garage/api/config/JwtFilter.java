@@ -1,4 +1,4 @@
-package com.garage.api.filter;
+package com.garage.api.config;
 
 import java.io.IOException;
 import java.util.Collections;

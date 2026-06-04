@@ -2,30 +2,43 @@ package com.garage.api.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+
+import lombok.RequiredArgsConstructor;
 
 @Configuration
+@EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
+    private final JwtFilter jwtFilter;
+
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            // 1. Prise en compte de la configuration CORS (indispensable pour ton Front-End JS)
-            .cors(Customizer.withDefaults()) 
-            
-            // 2. Désactivation du CSRF (obligatoire pour autoriser les requêtes POST/PUT/DELETE sans token)
             .csrf(csrf -> csrf.disable())
-            
-            // 3. Gestion des autorisations des routes
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
             .authorizeHttpRequests(auth -> auth
-                // 🔓 EN PHASE DE DEV : On ouvre absolument TOUT ce qui commence par /api/garage/
-                .requestMatchers("/api/garage/**").permitAll()
-                
-                // Tout le reste (si jamais tu as d'autres préfixes) demande une connexion
+                // Routes publiques — sans token
+                .requestMatchers("/api/garage/auth/**").permitAll()
+                .requestMatchers("/api/garage/prestations").permitAll()
+                .requestMatchers("/api/garage/produits").permitAll()
+                // Routes client — token CLIENT
+                .requestMatchers("/api/garage/rendezvous").hasRole("CLIENT")
+                // Routes mécanicien — token MECANICIEN
+                .requestMatchers("/api/garage/rendezvous/**").hasRole("MECANICIEN")
+                .requestMatchers("/api/garage/produits/**").hasRole("MECANICIEN")
+                .requestMatchers("/api/garage/prestations/**").hasRole("MECANICIEN")
                 .anyRequest().authenticated()
-            );
+            )
+            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
