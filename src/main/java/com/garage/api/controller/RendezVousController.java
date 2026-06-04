@@ -37,4 +37,10 @@ public class RendezVousController {
     public ResponseEntity<RendezVous> modifierStatut(@PathVariable Long id, @RequestParam String statut) {
         return ResponseEntity.ok(rendezVousService.changerStatutRDV(id, statut));
     }
+    
+    @GetMapping
+    public ResponseEntity<List<RendezVous>> getAllRendezVous() {
+        return ResponseEntity.ok(rendezVousService.getAllRendezVous());
+    }
+
 }

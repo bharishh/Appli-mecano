@@ -81,6 +81,10 @@ public class RendezVousService {
 
         return rdvEnregistre;
     }
+    
+    public List<RendezVous> getAllRendezVous() {
+        return rendezVousRepository.findAll();
+    }
 
     // Pour le planning du mécanicien (Admin)
     public List<RendezVous> getPlanningParJour(LocalDate date) {
