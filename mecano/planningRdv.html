@@ -1,10 +1,206 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Planning – AutoPlus</title>
+    <link rel="stylesheet" href="/css/reset.css">
+    <link rel="stylesheet" href="/css/planning.css">
 </head>
 <body>
+
+<header class="navbar">
+    <div class="nav-left">
+        <img src="../asset/logoGarage.png" alt="logo garage">
+    </div>
+    <nav class="nav-center">
+        <a href="../index.html">Accueil</a>
+        <a href="#">Services</a>
+        <a href="#">Contact</a>
+    </nav>
+    <div class="nav-right">
+        <button class="btn-profile" id="btn-deconnexion">Deconnexion</button>
+    </div>
+</header>
+<div class="planning-container">
+    <h2>Planning des rendez-vous</h2>
+
+    <div id="calendrier"></div>
+</div>
+
+<!-- Modal détail RDV -->
+<div class="modal-overlay" id="modal-overlay">
+    <div class="modal">
+        <h3>Détail du rendez-vous</h3>
+        <div class="modal-info">
+            <p><strong>Client :</strong> <span id="modal-client"></span></p>
+            <p><strong>Heure :</strong> <span id="modal-heure"></span></p>
+            <p><strong>Service :</strong> <span id="modal-service"></span></p>
+            <p><strong>Véhicule :</strong> <span id="modal-vehicule"></span></p>
+            <p><strong>Immatriculation :</strong> <span id="modal-immat"></span></p>
+            <p><strong>Statut :</strong> <span id="modal-statut"></span></p>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-valider" id="btn-valider">✓ Confirmer</button>
+            <button class="btn-annuler-rdv" id="btn-annuler-rdv">✗ Annuler</button>
+            <button class="btn-fermer" id="btn-fermer">Fermer</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+<script>
+    const API_URL = "http://localhost:8080/api/garage";
+    let rdvSelectionne = null;
+    let calendar = null;
+
+    document.addEventListener("DOMContentLoaded", async () => {
+        const rdvs = await chargerTousLesRdv();
+        initialiserCalendrier(rdvs);
+    });
+
+    // ===== CHARGEMENT RDV =====
+    async function chargerTousLesRdv() {
+        try {
+            const res = await fetch(`${API_URL}/rendezvous`);
+            return await res.json();
+        } catch (err) {
+            console.error("Erreur chargement RDV :", err);
+            return [];
+        }
+    }
+
+    // ===== CALENDRIER =====
+    function initialiserCalendrier(rdvs) {
+        const calendarEl = document.getElementById("calendrier");
+
+        calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: "timeGridWeek",
+            locale: "fr",
+
+            // Horaires garage : 8h-18h lun-ven, 8h-12h sam, fermé dim
+            slotMinTime: "08:00:00",
+            slotMaxTime: "18:00:00",
+            slotDuration: "00:30:00",
+
+            // Masquer dimanche
+            hiddenDays: [0],
+
+            // Limiter samedi à 12h
+            businessHours: [
+                {
+                    daysOfWeek: [1, 2, 3, 4, 5], // Lun - Ven
+                    startTime: "08:00",
+                    endTime: "18:00"
+                },
+                {
+                    daysOfWeek: [6], // Samedi
+                    startTime: "08:00",
+                    endTime: "12:00"
+                }
+            ],
+
+            // Griser les heures hors horaires
+            selectConstraint: "businessHours",
+
+            headerToolbar: {
+                left: "prev,next today",
+                center: "title",
+                right: "dayGridMonth,timeGridWeek,timeGridDay"
+            },
+
+            // Affichage des RDV avec nom + immat + service
+            events: rdvs.map(rdv => ({
+                id: rdv.id,
+                title: `${rdv.client.nom} ${rdv.client.prenom}\n${rdv.vehicule.immatriculation}\n${rdv.prestation.libelle}`,
+                start: `${rdv.dateRdv}T${rdv.heureRdv}`,
+                backgroundColor: couleurStatut(rdv.statut),
+                borderColor: couleurStatut(rdv.statut),
+                textColor: "#fff",
+                extendedProps: { rdv }
+            })),
+
+            eventClick: (info) => {
+                ouvrirModal(info.event.extendedProps.rdv);
+            },
+
+            // Griser samedi après-midi
+            eventDidMount: (info) => {
+                // Rien de spécial ici
+            }
+        });
+
+        calendar.render();
+    }
+
+    // ===== COULEURS STATUT =====
+    function couleurStatut(statut) {
+        const couleurs = {
+            "EN_ATTENTE": "#d69e2e",
+            "CONFIRME":   "#38a169",
+            "ANNULE":     "#e53e3e",
+            "TERMINE":    "#718096"
+        };
+        return couleurs[statut] || "#3182ce";
+    }
+
+    // ===== MODAL =====
+    function ouvrirModal(rdv) {
+        rdvSelectionne = rdv;
+        document.getElementById("modal-client").textContent = `${rdv.client.nom} ${rdv.client.prenom}`;
+        document.getElementById("modal-heure").textContent = rdv.heureRdv;
+        document.getElementById("modal-service").textContent = rdv.prestation.libelle;
+        document.getElementById("modal-vehicule").textContent = `${rdv.vehicule.marque} ${rdv.vehicule.modele}`;
+        document.getElementById("modal-immat").textContent = rdv.vehicule.immatriculation;
+
+        const badge = document.getElementById("modal-statut");
+        badge.textContent = rdv.statut;
+        badge.className = `statut-badge statut-${rdv.statut}`;
+
+        document.getElementById("modal-overlay").classList.add("visible");
+    }
+
+    // Fermer modal
+    document.getElementById("btn-fermer").addEventListener("click", () => {
+        document.getElementById("modal-overlay").classList.remove("visible");
+    });
+
+    // Confirmer RDV
+    document.getElementById("btn-valider").addEventListener("click", async () => {
+        if (!rdvSelectionne) return;
+        try {
+            await fetch(`${API_URL}/rendezvous/${rdvSelectionne.id}/statut?statut=CONFIRME`, {
+                method: "PUT"
+            });
+            alert("RDV confirmé !");
+            document.getElementById("modal-overlay").classList.remove("visible");
+            location.reload();
+        } catch (err) {
+            console.error("Erreur confirmation :", err);
+        }
+    });
+
+    // Annuler RDV
+    document.getElementById("btn-annuler-rdv").addEventListener("click", async () => {
+        if (!rdvSelectionne) return;
+        if (!confirm("Annuler ce rendez-vous ?")) return;
+        try {
+            await fetch(`${API_URL}/rendezvous/${rdvSelectionne.id}/statut?statut=ANNULE`, {
+                method: "PUT"
+            });
+            alert("RDV annulé !");
+            document.getElementById("modal-overlay").classList.remove("visible");
+            location.reload();
+        } catch (err) {
+            console.error("Erreur annulation :", err);
+        }
+    });
+
+    // Déconnexion
+    document.getElementById("btn-deconnexion").addEventListener("click", () => {
+        localStorage.removeItem("mecanicien");
+        window.location.href = "../index.html";
+    });
+</script>
 
 </body>
 </html>

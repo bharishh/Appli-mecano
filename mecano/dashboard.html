@@ -2,29 +2,24 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <link rel="apple-touch-icon" sizes="180x180" href="../favicon/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="../favicon/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="../favicon/favicon-16x16.png">
-    <link rel="manifest" href="../favicon/site.webmanifest">
     <title>Tableau de bord – AutoPlus</title>
-
     <link rel="stylesheet" href="/css/reset.css">
     <link rel="stylesheet" href="/css/dashboard.css">
 </head>
 <body>
 
 <header class="navbar">
-<div class="nav-left">
-    <img src="../asset/logoGarage.png" alt="logo garage">
-</div>
-<nav class="nav-center">
-    <a href="../index.html">Accueil</a>
-    <a href="#">Services</a>
-    <a href="#">Contact</a>
-</nav>
-<div class="nav-right">
-    <button class="btn-profile">Deconnexion</button>
-</div>
+    <div class="nav-left">
+        <img src="../asset/logoGarage.png" alt="logo garage">
+    </div>
+    <nav class="nav-center">
+        <a href="../index.html">Accueil</a>
+        <a href="#">Services</a>
+        <a href="#">Contact</a>
+    </nav>
+    <div class="nav-right">
+        <button class="btn-profile" id="btn-deconnexion">Deconnexion</button>
+    </div>
 </header>
 
 <main class="dashboard">
@@ -32,74 +27,148 @@
     <section class="stats">
         <div class="stat-card">
             <p>RDV Aujourd'hui</p>
-            <span>8</span>
+            <span id="stat-rdv-jour">...</span>
         </div>
-
         <div class="stat-card">
             <p>RDV Semaine</p>
-            <span>42</span>
+            <span id="stat-rdv-semaine">...</span>
         </div>
-
         <div class="stat-card">
             <p>Pneus en stock</p>
-            <span>150</span>
+            <span id="stat-stock-total">...</span>
         </div>
-
         <div class="stat-card alert">
             <p>Alerte Stock</p>
-            <span>3</span>
+            <span id="stat-alerte-stock">...</span>
         </div>
     </section>
 
-
     <section class="content">
 
-
-        <div class="box">
+        <div class="box" id="box-rdv">
             <h3>Prochains rendez-vous</h3>
-
-            <div class="item">
-                <strong>08:00 – Client : Dupont</strong>
-                <span>Service : Révision</span>
+            <div id="liste-rdv">
+                <div class="item"><span>Chargement...</span></div>
             </div>
-
-            <div class="item">
-                <strong>11:00 – Client : Martin</strong>
-                <span>Service : Freinage</span>
-            </div>
-
-            <div class="item">
-                <strong>15:00 – Client : Leroy</strong>
-                <span>Service : Pneus</span>
-            </div>
-
-            <button class="btn-secondary">Voir tout le planning →</button>
+            <button class="btn-secondary" onclick="window.location.href='planning.html'">Voir tout le planning →</button>
         </div>
 
-        <div class="box">
+        <div class="box" id="box-stock">
             <h3>Alerte stock pneus</h3>
-
-            <div class="item">
-                <strong>Référence : PNEU-205-55</strong>
-                <span>Stock : 4 unités (seuil critique)</span>
+            <div id="liste-stock">
+                <div class="item"><span>Chargement...</span></div>
             </div>
-
-            <div class="item">
-                <strong>Référence : PNEU-195-65</strong>
-                <span>Stock : 2 unités (seuil critique)</span>
-            </div>
-
-            <div class="item">
-                <strong>Référence : PNEU-225-45</strong>
-                <span>Stock : 3 unités (seuil critique)</span>
-            </div>
-
-            <button class="btn-secondary">Gérer le stock →</button>
+            <button class="btn-secondary" onclick="window.location.href='stock.html'">Gérer le stock →</button>
         </div>
 
     </section>
 
 </main>
+
+<script>
+    const API_URL = "http://localhost:8080/api/garage";
+    const today = new Date().toISOString().split('T')[0];
+
+    // Chargement au démarrage
+    document.addEventListener("DOMContentLoaded", () => {
+        chargerRdvDuJour();
+        chargerStockFaible();
+        chargerStockTotal();
+    });
+
+    // ===== RDV DU JOUR =====
+    async function chargerRdvDuJour() {
+        try {
+            const res = await fetch(`${API_URL}/rendezvous/planning?date=${today}`);
+            const rdvs = await res.json();
+
+            // Stat card
+            document.getElementById("stat-rdv-jour").textContent = rdvs.length;
+
+            // Liste RDV
+            const container = document.getElementById("liste-rdv");
+            container.innerHTML = "";
+
+            if (rdvs.length === 0) {
+                container.innerHTML = `<div class="item"><span>Aucun rendez-vous aujourd'hui</span></div>`;
+            } else {
+                rdvs.slice(0, 3).forEach(rdv => {
+                    const item = document.createElement("div");
+                    item.classList.add("item");
+                    item.innerHTML = `
+                        <strong>${rdv.heureRdv} – Client : ${rdv.client.nom}</strong>
+                        <span>Service : ${rdv.prestation.libelle}</span>
+                    `;
+                    container.appendChild(item);
+                });
+            }
+
+        } catch (err) {
+            document.getElementById("stat-rdv-jour").textContent = "0";
+            document.getElementById("liste-rdv").innerHTML = `<div class="item"><span>Erreur de chargement</span></div>`;
+            console.error("Erreur RDV :", err);
+        }
+    }
+
+    // ===== STOCK FAIBLE =====
+    async function chargerStockFaible() {
+        try {
+            const res = await fetch(`${API_URL}/produits/stock-faible?seuil=5`);
+            const produits = await res.json();
+
+            // Stat card alerte
+            document.getElementById("stat-alerte-stock").textContent = produits.length;
+
+            // Liste stock faible
+            const container = document.getElementById("liste-stock");
+            container.innerHTML = "";
+
+            if (produits.length === 0) {
+                container.innerHTML = `<div class="item"><span>Aucune alerte stock</span></div>`;
+            } else {
+                produits.slice(0, 3).forEach(p => {
+                    const item = document.createElement("div");
+                    item.classList.add("item");
+                    item.innerHTML = `
+                        <strong>Référence : ${p.nom}</strong>
+                        <span>Stock : ${p.quantiteStock} unités (seuil critique)</span>
+                    `;
+                    container.appendChild(item);
+                });
+            }
+
+        } catch (err) {
+            document.getElementById("stat-alerte-stock").textContent = "0";
+            document.getElementById("liste-stock").innerHTML = `<div class="item"><span>Erreur de chargement</span></div>`;
+            console.error("Erreur stock :", err);
+        }
+    }
+
+    // ===== STOCK TOTAL =====
+    async function chargerStockTotal() {
+        try {
+            const res = await fetch(`${API_URL}/produits`);
+            const produits = await res.json();
+
+            // Total stock
+            const total = produits.reduce((acc, p) => acc + p.quantiteStock, 0);
+            document.getElementById("stat-stock-total").textContent = total;
+
+            // Total RDV semaine (on réutilise la liste du jour * 5 approximatif)
+            document.getElementById("stat-rdv-semaine").textContent = "—";
+
+        } catch (err) {
+            document.getElementById("stat-stock-total").textContent = "0";
+            console.error("Erreur stock total :", err);
+        }
+    }
+
+    // ===== DECONNEXION =====
+    document.getElementById("btn-deconnexion").addEventListener("click", () => {
+        localStorage.removeItem("mecanicien");
+        window.location.href = "../index.html";
+    });
+</script>
 
 </body>
 </html>
