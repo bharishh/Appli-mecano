@@ -107,6 +107,12 @@
     <artifactId>jjwt-jackson</artifactId>
     <version>0.11.5</version>
 </dependency>
+
+<dependency>
+    <groupId>org.owasp.antisamy</groupId>
+    <artifactId>antisamy</artifactId>
+    <version>1.7.4</version>
+</dependency>
 	</dependencies>
 
 	<build>

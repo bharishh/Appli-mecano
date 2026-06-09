@@ -11,6 +11,7 @@ import com.garage.api.entity.Mecanicien;
 import com.garage.api.exception.AuthException;
 import com.garage.api.repository.ClientRepository;
 import com.garage.api.repository.MecanicienRepository;
+import com.garage.api.utils.XssUtils;
 
 import lombok.RequiredArgsConstructor;
 
@@ -22,17 +23,32 @@ public class AuthService {
     private final MecanicienRepository mecanicienRepository;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     private final JwtService jwtService;
+    
+    
+    
 
     // Inscription client
     public AuthResponse register(RegisterRequest request) {
+    	  // Validation XSS
+        if (!XssUtils.isValidName(request.getNom()))
+            throw new AuthException("Nom invalide");
+        if (!XssUtils.isValidName(request.getPrenom()))
+            throw new AuthException("Prénom invalide");
+        if (!XssUtils.isValidEmail(request.getEmail()))
+            throw new AuthException("Email invalide");
+        if (!XssUtils.isValidPhone(request.getTelephone()))
+            throw new AuthException("Téléphone invalide");
+
+    	
         if (clientRepository.findByEmail(request.getEmail()).isPresent())
             throw new AuthException("Email déjà utilisé");
 
+
         Client client = Client.builder()
-                .nom(request.getNom())
-                .prenom(request.getPrenom())
-                .email(request.getEmail())
-                .telephone(request.getTelephone())
+                .nom(XssUtils.sanitize(request.getNom()))
+                .prenom(XssUtils.sanitize(request.getPrenom()))
+                .email(request.getEmail().toLowerCase().trim())
+                .telephone(XssUtils.sanitize(request.getTelephone()))
                 .password(passwordEncoder.encode(request.getPassword()))
                 .build();
 
@@ -49,9 +65,18 @@ public class AuthService {
                 .token(token)
                 .build();
     }
+    
+    
+    
+    
+    
 
     // Connexion client ou mécanicien
     public AuthResponse login(LoginRequest request) {
+    	
+    	// Validation email
+        if (!XssUtils.isValidEmail(request.getEmail()))
+            throw new AuthException("Email invalide");
 
         // Cherche d'abord dans Mecanicien
         var meca = mecanicienRepository.findByEmail(request.getEmail());
@@ -71,6 +96,10 @@ public class AuthService {
                     .token(token)
                     .build();
         }
+        
+        
+        
+        
 
         // Sinon cherche dans Client
         Client client = clientRepository.findByEmail(request.getEmail())
@@ -91,15 +120,30 @@ public class AuthService {
                 .build();
     }
 
+    
+    
     // Inscription mécanicien
     public AuthResponse registerMecanicien(RegisterRequest request) {
+    	
+    	 // Validation XSS
+        if (!XssUtils.isValidName(request.getNom()))
+            throw new AuthException("Nom invalide");
+        if (!XssUtils.isValidName(request.getPrenom()))
+            throw new AuthException("Prénom invalide");
+        if (!XssUtils.isValidEmail(request.getEmail()))
+            throw new AuthException("Email invalide");
+        if (!XssUtils.isValidPhone(request.getTelephone()))
+            throw new AuthException("Téléphone invalide");
+        
+        
         Mecanicien meca = Mecanicien.builder()
-                .nom(request.getNom())
-                .prenom(request.getPrenom())
-                .email(request.getEmail())
-                .telephone(request.getTelephone())
+                .nom(XssUtils.sanitize(request.getNom()))
+                .prenom(XssUtils.sanitize(request.getPrenom()))
+                .email(request.getEmail().toLowerCase().trim())
+                .telephone(XssUtils.sanitize(request.getTelephone()))
                 .password(passwordEncoder.encode(request.getPassword()))
                 .build();
+
 
         mecanicienRepository.save(meca);
         String token = jwtService.generateToken(meca.getEmail(), "MECANICIEN");

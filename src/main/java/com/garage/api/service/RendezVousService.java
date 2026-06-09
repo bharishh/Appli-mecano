@@ -17,6 +17,7 @@ import com.garage.api.repository.MecanicienRepository;
 import com.garage.api.repository.PrestationRepository;
 import com.garage.api.repository.RendezVousRepository;
 import com.garage.api.repository.VehiculeRepository;
+import com.garage.api.utils.XssUtils;
 
 import lombok.RequiredArgsConstructor;
 
@@ -33,37 +34,45 @@ public class RendezVousService {
     @Transactional
     public RendezVous prendreRendezVous(RendezVousRequest request) {
         
-        //  Vérifier si le créneau est déjà pris
+    	// Validation XSS
+        if (!XssUtils.isValidName(request.getMarque()))
+            throw new RuntimeException("Marque invalide");
+        if (!XssUtils.isValidName(request.getModele()))
+            throw new RuntimeException("Modèle invalide");
+        if (!XssUtils.isValidImmatriculation(request.getImmatriculation()))
+            throw new RuntimeException("Immatriculation invalide (format : AB-123-CD)");
+
+        
+ 
         if (rendezVousRepository.existsByDateRdvAndHeureRdv(request.getDateRdv(), request.getHeureRdv())) {
             throw new RuntimeException("Ce créneau horaire est déjà réservé.");
         }
 
-        // Récupérer le client
+  
         Client client = clientRepository.findById(request.getIdClient())
                 .orElseThrow(() -> new RuntimeException("Client introuvable."));
 
-        //  Récupérer la prestation
+ 
         Prestation prestation = prestationRepository.findById(request.getIdPrestation())
                 .orElseThrow(() -> new RuntimeException("Prestation introuvable."));
 
-        // Récupérer le mécanicien par défaut (ID 1L) 
+  
         Mecanicien mecanicienParDefaut = mecanicienRepository.findById(1L)
                 .orElseThrow(() -> new RuntimeException("Mécanicien par défaut introuvable en BDD."));
         
-        // Créer et enregistrer le véhicule lié au client
-        Vehicule vehicule = Vehicule.builder()
-                .marque(request.getMarque())
-                .modele(request.getModele())
-                .immatriculation(request.getImmatriculation())
-                .annee(request.getAnnee())
-                .typeCarburant(request.getTypeCarburant())
-                .kilometrage(request.getKilometrage())
-                .client(client) 
-                .build();
         
+        Vehicule vehicule = Vehicule.builder()
+                .marque(XssUtils.sanitize(request.getMarque()))
+                .modele(XssUtils.sanitize(request.getModele()))
+                .immatriculation(request.getImmatriculation().toUpperCase().trim())
+                .annee(request.getAnnee())
+                .typeCarburant(XssUtils.sanitize(request.getTypeCarburant()))
+                .kilometrage(request.getKilometrage())
+                .client(client)
+                .build();
         vehicule = vehiculeRepository.save(vehicule);
 
-        // Créer et enregistrer le Rendez-vous avec TOUTES ses clés étrangères du MLD
+       
         RendezVous rdv = RendezVous.builder()
                 .dateRdv(request.getDateRdv())
                 .heureRdv(request.getHeureRdv())
@@ -91,7 +100,7 @@ public class RendezVousService {
         return rendezVousRepository.findByDateRdv(date);
     }
 
-    // Annuler ou modifier le statut d'un RDV (Mécano ou Client)
+    
     public RendezVous changerStatutRDV(Long idRdv, String nouveauStatut) {
         RendezVous rdv = rendezVousRepository.findById(idRdv)
                 .orElseThrow(() -> new RuntimeException("Rendez-vous introuvable."));
