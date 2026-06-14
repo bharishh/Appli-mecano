@@ -27,15 +27,15 @@ public class SecurityConfig {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
             .authorizeHttpRequests(auth -> auth
-                // Routes publiques
+     
                 .requestMatchers("/api/garage/auth/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/garage/prestations").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/garage/produits").permitAll()
 
-                // Routes client
+
                 .requestMatchers(HttpMethod.POST, "/api/garage/rendezvous").hasRole("CLIENT")
 
-                // Routes mécanicien
+ 
                 .requestMatchers(HttpMethod.GET, "/api/garage/rendezvous").hasRole("MECANICIEN")
                 .requestMatchers(HttpMethod.GET, "/api/garage/rendezvous/**").hasRole("MECANICIEN")
                 .requestMatchers(HttpMethod.PUT, "/api/garage/rendezvous/**").hasRole("MECANICIEN")

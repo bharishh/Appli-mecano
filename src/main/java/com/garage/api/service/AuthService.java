@@ -27,7 +27,7 @@ public class AuthService {
     
     
 
-    // Inscription client
+
     public AuthResponse register(RegisterRequest request) {
     	  // Validation XSS
         if (!XssUtils.isValidName(request.getNom()))
@@ -66,12 +66,9 @@ public class AuthService {
                 .build();
     }
     
-    
-    
-    
-    
+   
 
-    // Connexion client ou mécanicien
+ 
     public AuthResponse login(LoginRequest request) {
     	
     	// Validation email
@@ -101,7 +98,6 @@ public class AuthService {
         
         
 
-        // Sinon cherche dans Client
         Client client = clientRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new AuthException("Email introuvable"));
 
@@ -122,7 +118,7 @@ public class AuthService {
 
     
     
-    // Inscription mécanicien
+
     public AuthResponse registerMecanicien(RegisterRequest request) {
     	
     	 // Validation XSS

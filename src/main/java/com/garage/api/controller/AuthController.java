@@ -22,19 +22,19 @@ public class AuthController {
 
     private final AuthService authService;
 
-    // Inscription client
+  
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request) {
         return ResponseEntity.ok(authService.register(request));
     }
 
-    // Connexion client ou mécanicien (un seul endpoint)
+ 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));
     }
 
-    // Inscription mécanicien (une seule fois)
+    
     @PostMapping("/register/mecanicien")
     public ResponseEntity<AuthResponse> registerMecanicien(@RequestBody RegisterRequest request) {
         return ResponseEntity.ok(authService.registerMecanicien(request));

@@ -14,7 +14,6 @@ public class JwtService {
 
     private static final String SECRET_KEY = "garage_auto_cle_secrete_32_chars_min!!";
 
-    // Générer un token avec email + role
     public String generateToken(String email, String role) {
         return Jwts.builder()
                 .setSubject(email)
@@ -25,7 +24,6 @@ public class JwtService {
                 .compact();
     }
 
-    // Extraire l'email du token
     public String extractEmail(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSignKey())
@@ -35,7 +33,7 @@ public class JwtService {
                 .getSubject();
     }
 
-    // Extraire le role du token
+
     public String extractRole(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSignKey())
@@ -45,7 +43,7 @@ public class JwtService {
                 .get("role", String.class);
     }
 
-    // Vérifier si le token est valide
+   
     public boolean isTokenValid(String token) {
         try {
             Jwts.parserBuilder()
